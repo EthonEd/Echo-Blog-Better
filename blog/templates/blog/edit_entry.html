@@ -1,0 +1,22 @@
+{% extends 'base_editor.html' %}
+{% load bootstrap3 %}
+
+{% block edtor_header %}
+  <div class="page-header">
+  <h3>修改条目</h3>
+  </div>
+{% endblock %}
+
+
+{% block editor_content %}
+  <form action="{% url 'blog:edit_entry' entry.id %}" method='post' class="form">
+    {% csrf_token %}
+    {{ form.media }}
+    {% bootstrap_form form %}
+
+    {% buttons %}
+             <button name="submit" class="btn btn-primary">save changes</button>
+    {% endbuttons %}
+    </form>
+
+{% endblock %}

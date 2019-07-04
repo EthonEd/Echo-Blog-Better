@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load markdown_deux_tags %}
+{% load static %}
+
+{% block header %}
+  <div class="page-header">
+    <h3>
+      {{ blog.title }}
+
+      {#    登录用户才可以编辑    #}
+      {% if user.is_authenticated and user == blog.author %}
+        <small>
+          {#          <a href="{% url 'blog:edit_blog' blog.id %}">#}
+          {#            <span class="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑随笔</a>#}
+          {#        <a href="#" class="pull-right">#}
+          {#            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>#}
+        </small>
+      {% endif %}
+
+    </h3>
+    <h5>Posted {{ blog.pub_date|date:'Y-m-d H:i' }}<span style="padding-left: 1em">by {{ blog.author }}</span></h5>
+  </div>
+
+{% endblock %}
+
+
+{% block content %}
+  {#    登录用户才可以编辑    #}
+  {% if user.is_authenticated and user == blog.author %}
+    <p>
+      <a href="{% url 'blog:new_blog' %}" id="me-a-title">
+        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 添加新随笔</a>
+      <a href="{% url 'blog:edit_blog' blog.id %}" id="me-a-title" style="padding-left: 2em">
+        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑随笔</a>
+      <a href="#" id="me-a-title" style="padding-left: 2em">
+        <span class="glyphicon glyphicon-trash" aria-hidden="true">删除随笔</span></a>
+    </p>
+  {% endif %}
+  <div class="panel panel--default">
+    <div class="panel-body" id="me-p-body">
+      {{ blog.content|safe }}
+    </div>
+  </div> <!-- panel -->
+
+
+  {# 不能在container里包含container #}
+  <div class="row">
+    <div class="col-xs-12 col-sm-8 col-md-8 col-lg-9">
+      {% if previous_page %}
+        <p>上一篇；<a href="{% url 'blog:blog' previous_page.id %}">{{ previous_page.title }}</a></p>
+      {% else %}
+        <P>到顶了</P>
+      {% endif %}
+      {% if next_page %}
+        <p>下一篇：<a href="{% url 'blog:blog' next_page.id %}">{{ next_page.title }}</a></p>
+      {% else %}
+        <P>到头了</P>
+      {% endif %}
+    </div>
+    <div class="hidden-xs col-sm-4 col-md-4 col-lg-3">
+      <div style="position: center; height: 40px">
+        <h4>
+          <a href="{% url 'blog:new_blog' %}" id="me-a-title">
+            <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>
+          <a href="{% url 'blog:edit_blog' blog.id %}" id="me-a-title" style="padding-left: 3.5em">
+            <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span></a>
+          <a href="#" id="me-a-title" class="pull-right">
+            <span class="glyphicon glyphicon-share" aria-hidden="true"></span></a>
+        </h4>
+      </div>
+    </div>
+  </div>
+
+  {#  评论区域#}
+  <div style="margin-top: 7em">
+    {% if user.is_authenticated %}
+      <div class="page-header">
+        <h4>评论</h4>
+      </div>
+      <form id="comment_form" action="{% url 'comment:update_comment' %}" method="POST" style="overflow: hidden">
+        {% csrf_token %}
+        {% for field in comment_form %}
+          {{ field }}
+        {% endfor %}
+        <p class="text-danger pull-left" id="comment_error">{{ field.errors }}</p>
+        <input class="btn btn-primary pull-right" type="submit" value="提交评论">
+      </form>
+    {% else %}
+      提交评论
+      <a href="{% url 'users:login' %}?from={{ request.get_full_path }}">登录</a>or
+      <a href="{% url 'users:register' %}?from={{ request.get_full_path }}">注册</a>
+    {% endif %}
+
+
+    <div class="page-header">
+      <h4>评论列表</h4>
+    </div>
+
+    {% for comment in comments %}
+      <div style="margin-bottom: 3em">
+        <div class="media">
+          <div class="media-left">
+            <a href="#">
+              <img class="media-object img-circle" src="{% static 'img/icon.jpg' %}" alt="..."
+                   style="width: 35px; height: 34px">
+            </a>
+          </div>
+          <div class="media-body">
+            <h4 class="media-heading">{{ comment.user }}</h4>
+            <div style="margin-top: 1.5em">
+              {{ comment.text|safe }}
+            </div>
+            <small>
+              posted {{ blog.pub_date|date:'Y-m-d H:i' }}
+              <a href="{% url 'blog:new_blog' %}" id="me-a-title" class="pull-right">
+                <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> 60</a>
+              <a href="{% url 'blog:new_blog' %}" id="me-a-title" class="pull-right">
+                <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> 2</a>
+            </small>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      There are no comments yet.
+    {% endfor %}
+  </div>
+
+{% endblock %}
+{# 博主基本信息 #}
+{% block content_right %}
+  <div class="panel" style="margin-top: 5em">
+  <div class="panel-body">
+    <div align="center">
+      <img src="{% static 'img/icon.jpg' %}" alt="..." class="img-circle" width="40%">
+    </div>
+    <div align="center" style="margin-top: 1.5em">
+      <P>
+        {{ blog.author }}
+      </P>
+      <p>这场残暴的欢愉,终将以残暴终结</p>
+      <p>粉丝 100 关注 12 文章88</p>
+    </div>
+  </div>
+
+  {#  相关推荐 #}
+    <div align="center" style="margin-top: 1.5em">
+      <div class="page-header">
+        <h4>相关推荐</h4>
+      </div>
+      <P>
+        {{ blog.author }}
+      </P>
+      <p>这场残暴的欢愉,终将以残暴终结</p>
+      <p>粉丝 100 关注 12 文章88</p>
+    </div>
+{% endblock %}
+
+{% block script_add %}
+  <script>
+      $('#comment_form').submit(function () {
+
+          $('#comment_error').text('');
+
+          if (CKEDITOR.instances['id_text'].document.getBody().getText().trim() == '') {
+              $('#comment_error').text('评论内容不能为空');
+              return false;
+          }
+
+          CKEDITOR.instances['id_text'].updateElement();
+
+          $.ajax({
+              url: '{% url 'comment:update_comment' %}',
+              type: 'POST',
+              data: $(this).serialize(),
+              cache: false,
+              success: function (data) {
+                  {#console.log(data);#}
+                  if (data['status'] == 'SUCCESS') {
+                      var comment_html = '<div>' + data['username'] + '(' + data['comment_time'] + '): ' + data['text'] + '</div>';
+                      $('#comment_list').prepend(comment_html);
+                      CKEDITOR.instances['id_text'].setData('')
+                  } else {
+                      $('#comment_error').text(data['message']);
+                  }
+              },
+              error: function (xhr) {
+                  console.log(xhr)
+              }
+          });
+          return false
+      })
+  </script>
+
+{% endblock %}

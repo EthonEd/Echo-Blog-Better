@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div>
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">随笔</a></li>
+    <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">专题</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="home">
+      <h3>cnvncvcmvmcmvm</h3>
+{#      {% for blog in blogs %}#}
+{#    <div class="panel">#}
+{#      <h3>#}
+{#        <a href="{% url 'blog:blog' blog.id %}" id="me-a-title">{{ blog.name }}</a>#}
+{#        <small>#}
+{#          <span class="glyphicon glyphicon-tag " aria-hidden="true"><a href="#">{{ blog.tag }}</a></span>#}
+{#        </small>#}
+{#      </h3>#}
+{#      <p>#}
+{#        posted {{ blog.create_time|date:'Y-m-d' }} views 2#}
+{#      </p>#}
+{#      <div class="panel-body" id="me-p-body">#}
+{#        {{ blog.tagline|truncatechars:250 }}#}
+{#      </div>#}
+{#    </div> <!-- panel -->#}
+{#  {% empty %}#}
+{#  {% endfor %}#}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="profile">
+      <h3>jshdafhlskflsdkfjsdfsjdk</h3>
+    </div>
+  </div>
+
+</div>
+
+
+{% endblock %}

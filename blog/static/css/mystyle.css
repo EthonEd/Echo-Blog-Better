@@ -1,0 +1,26 @@
+#me-nv {
+     background-color:transparent;
+     border-color: transparent;
+}
+
+#me-bd {
+    font-size: 30px;
+    padding: 15px 15px 15px 0;
+    color: black;
+}
+
+#me-p-body {
+    color: #918e8e;
+    padding: 10px 15px 15px 0;
+    font-size: 16px;
+}
+
+#me-a-title {
+    color: #434445;
+    /*padding-left: 2em;  第一个改不了*/
+}
+
+
+div.django-ckeditor-widget {
+    width: 100%;
+}
