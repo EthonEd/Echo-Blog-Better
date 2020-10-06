@@ -11,8 +11,11 @@ urlpatterns = [
     path('', views.blogs, name='blogs'),
     path('<int:page>/', views.blogs, name='blogs'),  # 这要强转为int，否则报错未知未知参数page
     path('blogs/<int:blog_id>/', views.blog, name='blog'),
+    path('<int:year>/<int:month>/', views.blog_with_data, name='blog_with_data'),
+    path('tag/<int:tag_id>/', views.blog_with_tag, name='blog_with_tag'),
     path('new_blog/', views.new_blog, name='new_blog'),
     path('edit_blog/<int:blog_id>/', views.edit_blog, name='edit_blog'),
+    path('delete_blog/<int:blog_id>/', views.delete_blog, name='blogs'),
 
     path('tp/', views.topics, name='topics'),  # 这要必须写个空page，让初始匹配
     path('tp/<int:page>/', views.topics, name='topics'),  # 这要强转为int，否则报错未知未知参数paged

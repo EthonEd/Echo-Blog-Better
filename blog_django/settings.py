@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'blog',
     'users',
     'comment',
+    'read_statistics',
 ]
 
 MIDDLEWARE = [
@@ -95,7 +96,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'echo',
         'USER': 'root',
-        'PASSWORD': '978213690yq',
+        'PASSWORD': '12345678',
+        # 'PASSWORD': 'root',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
@@ -130,7 +132,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False  # 如果不禁用时区，按月月份查找不到数据
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
@@ -174,14 +176,18 @@ CKEDITOR_CONFIGS = {
     # },
 
     'default': {
+        'language': 'zh-cn',
         'toolbar': 'custom',
         'toolbar_custom': [
             ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript'],
+            ['Header1'],
+            ['Undo', 'Redo'],
             ['TextColor', 'BGColor', 'RemoveFormat'],
             ['NumberedList', 'BulletedList'],
             ['Link', 'Unlink'],
             ['Smiley', 'SpecialChar', 'Blockquote'],
-            ['CodeSnippet'], ['Source'],
+            ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe'],
+            ['CodeSnippet'], ['Source'], ['Maximize']
         ],
         'width': 'auto',
         'height': '120',
@@ -189,7 +195,7 @@ CKEDITOR_CONFIGS = {
         'removePlugins': 'elementspath',
         'resize_enabled': False,
         # 添加的插件
-        'extraPlugins': 'codesnippet',
+        'extraPlugins': ','.join(['codesnippet', 'uploadimage', 'widget', 'lineutils',]),
     },
 }
 

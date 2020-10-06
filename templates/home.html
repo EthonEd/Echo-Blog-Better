@@ -15,7 +15,181 @@
     </h2>
   </div>
 
-{% endblock content %}
+
+
+  <div>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">访问统计</a>
+      </li>
+      <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">阅读排行</a></li>
+    </ul>
+
+    {# 数据展示==================================================== #}
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="home">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">一周博客阅读数</h3>
+          </div>
+          <div class="panel-body">
+            <div id="container" style="max-width: 18em; min-width:12em;height:12em"></div>
+            <script>
+                // 图表配置
+                var options = {
+                    chart: {
+                        type: 'line'                          //指定图表的类型，默认是折线图（line）
+                    },
+                    title: {
+                        text: null                 // 标题
+                    },
+                    xAxis: {
+                        categories: {{ dates|safe }}   // x 轴分类
+                    },
+                    yAxis: {
+                        title: {text: null},
+                        labels: {enabled: false},
+                        gridLineDashStyle: 'Dash',
+                    },
+                    series: [{                              // 数据列
+                        name: '阅读量',                        // 数据列名
+                        data: {{ read_nums }}                    // 数据
+                    },],
+                    legend: enable = false,
+                    credits: enabled = false,
+                    plotOptions: {
+                        line: {
+                            dataLabels: {
+                                enabled: true
+                            }
+                        }
+                    }
+                };
+                // 图表初始化函数
+                var chart = Highcharts.chart('container', options);
+            </script>
+          </div>
+        </div>
+
+
+        {#   阅读榜========================================================     #}
+      </div>
+      <div role="tabpanel" class="tab-pane" id="profile">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">阅读榜</h3>
+          </div>
+          <div class="panel-body">
+            <p>今日阅读榜</p>
+            <ul>
+              {% for today_data in read_hot_today_datas|slice:'0:3' %}
+                <li style="display: block">
+                  <a href="{% url 'blog:blog' today_data.content_type.pk %}" id="title">
+                    {{ today_data.content_object.title }}({{ today_data.read_num }})
+                  </a>
+                </li>
+              {% empty %}
+                暂无阅读
+              {% endfor %}
+            </ul>
+            <p>一周阅读榜</p>
+            <ul>
+              {% for week_blog in read_hot_week_blogs %}
+                <li>
+                  <a href="{% url 'blog:blog' week_blog.id %}" id="title">
+                    {{ week_blog.title }}({{ week_blog.read_num_sum }})
+                  </a>
+                </li>
+              {% empty %}
+                暂无阅读
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+{% endblock %}
+
+{% block content_right_header1 %}
+  <h4>今日阅读榜</h4>
+{% endblock %}
+{% block content_right_for1 %}
+  <ul>
+  {% for today_data in read_hot_today_datas|slice:'0:3' %}
+    <li>
+      <a href="{% url 'blog:blog' today_data.content_object.id %}" id="title">
+        {{ today_data.content_object.title }}({{ today_data.read_num }})
+      </a>
+    </li>
+  {% empty %}
+    暂无阅读
+  {% endfor %}
+  </ul>
+{% endblock %}
+
+
+{% block content_right_header2 %}
+  <h4>一周阅读榜</h4>
+{% endblock %}
+{% block content_right_for2 %}
+  <ul>
+  {% for week_blog in read_hot_week_blogs %}
+    <li>
+      <a href="{% url 'blog:blog' week_blog.id %}" id="title">
+        {{ week_blog.title }}({{ week_blog.read_num_sum }})
+      </a>
+    </li>
+  {% empty %}
+    暂无阅读
+  {% endfor %}
+  </ul>
+{% endblock %}
+
+
+
+
+{#{% block content_right %}#}
+{#  <div align="center" id="me-block-right">#}
+{#    <div class="page-header">#}
+{#      <h4>今日阅读榜</h4>#}
+{#    </div>#}
+{#    <div id="me-li">#}
+{#      <ul>#}
+{#        {% for today_data in read_hot_today_datas|slice:'0:3' %}#}
+{#          <li>#}
+{#            <a href="{% url 'blog:blog' today_data.content_object.id %}" id="title">#}
+{#              {{ today_data.content_object.title }}({{ today_data.read_num }})#}
+{#            </a>#}
+{#          </li>#}
+{#        {% empty %}#}
+{#          暂无阅读#}
+{#        {% endfor %}#}
+{#      </ul>#}
+{#    </div>#}
+{#  </div>#}
+{##}
+{#  <div align="center" id="me-block-right">#}
+{#    <div class="page-header">#}
+{#      <h4>一周阅读榜</h4>#}
+{#    </div>#}
+{#    <div id="me-li">#}
+{#      <ul>#}
+{#        {% for week_blog in read_hot_week_blogs %}#}
+{#          <li>#}
+{#            <a href="{% url 'blog:blog' week_blog.id %}" id="title">#}
+{#              {{ week_blog.title }}({{ week_blog.read_num_sum }})#}
+{#            </a>#}
+{#          </li>#}
+{#        {% empty %}#}
+{#          暂无阅读#}
+{#        {% endfor %}#}
+{#      </ul>#}
+{#    </div>#}
+{#  </div>#}
+{#{% endblock %}#}
 
 
 

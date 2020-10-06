@@ -1,14 +1,27 @@
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
+from read_statistics.models import ReadDetail, UtilMethod
 
-class Blog(models.Model):
+
+class Tag(models.Model):
+    tag_name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.tag_name
+
+
+# 忘了UtilMethod 然后迁移数据库
+class Blog(models.Model, UtilMethod):  # 继承了两个父类，其中一个是我们自定义的公共方法
     title = models.CharField(max_length=100)
-    tag = models.CharField(max_length=20)
+    # tag = models.CharField(max_length=20)
+    tag = models.ForeignKey(Tag, on_delete=models.DO_NOTHING)
     content = models.TextField()
     pub_date = models.DateTimeField(auto_now_add=True)  # models.DateField 没有小时和分钟
     mod_date = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    read_details = GenericRelation(ReadDetail)
 
     def __str__(self):
         return self.title
@@ -23,6 +36,7 @@ class Topic(models.Model):
     tag = models.CharField(max_length=20)
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    read_details = GenericRelation(ReadDetail)
 
     def __str__(self):
         return self.name

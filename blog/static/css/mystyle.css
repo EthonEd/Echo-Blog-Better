@@ -1,6 +1,6 @@
 #me-nv {
-     background-color:transparent;
-     border-color: transparent;
+    background-color: transparent;
+    border-color: transparent;
 }
 
 #me-bd {
@@ -23,4 +23,16 @@
 
 div.django-ckeditor-widget {
     width: 100%;
+}
+
+li {
+    display: block;
+}
+
+div#me-li a {
+    color: #777;
+}
+
+#me-block-right {
+    margin-top: 1.5em;
 }

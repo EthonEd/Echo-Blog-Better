@@ -1,14 +1,39 @@
+import datetime
+
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
+from django.db.models import Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
 from blog.forms import BlogForm, EntryForm, TopicForm
-from blog.models import Blog, Entry, Topic
+from blog.models import Blog, Entry, Topic, Tag
 from blog_django.settings import PAGE_NUM
 from comment.forms import CommentForm
 from comment.models import Comment
+from read_statistics.utils import read_statistics
+
+
+def common(request, blog_list=Blog.objects.all()):  # 默认为空不知道有没有问题
+    paginator = Paginator(blog_list, PAGE_NUM)  # Show 4 blogs per page
+    page = request.GET.get('page')
+    blogs = paginator.get_page(page)
+
+    # 统计按年月分的博客数
+    blog_date_list = Blog.objects.dates('pub_date', 'month', order='DESC')
+    print(blog_date_list)
+    blog_date_dict = {}
+    for blog_date in blog_date_list:
+        blog_date_dict[blog_date] = Blog.objects.filter(pub_date__year=blog_date.year, pub_date__month=blog_date.month).count()
+
+    context = {
+        'blogs': blogs,
+        'count': paginator.count,
+        'blog_tag_list': Tag.objects.annotate(blog_count=Count('blog')),
+        'blog_date_dict': blog_date_dict,
+    }
+    return context
 
 
 def pages(request, list=Blog.objects.all()):
@@ -19,20 +44,19 @@ def pages(request, list=Blog.objects.all()):
 
 
 def blogs(request):
-    # 取全部的博客
-    blogs = Blog.objects.all()
-    context = {
-        'blogs': pages(request, list=blogs)  # 对全部博客进行分页
-    }
+    context = common(request)
     return render(request, 'blog/blogs.html', context)
 
 
 def blog(request, blog_id):
     blog = Blog.objects.get(id=blog_id)
 
+    # 阅读数统计
+    read_cookie_key = read_statistics(request, blog)
+
     # 上一篇下一篇
-    previous_page = Blog.objects.filter(pub_date__gte=blog.pub_date).last() # gte两篇文章同时发表，对于一个用户是不正确的，多用户有很可能
-    next_page = Blog.objects.filter(pub_date__lte=blog.pub_date).first()
+    previous_page = Blog.objects.filter(pub_date__gt=blog.pub_date).last()  # gte两篇文章同时发表，对于一个用户是不正确的，多用户有很可能
+    next_page = Blog.objects.filter(pub_date__lt=blog.pub_date).first()
 
     # 获取评论对象
     blog_content_type = ContentType.objects.get_for_model(blog)
@@ -46,7 +70,9 @@ def blog(request, blog_id):
         'comment_form': CommentForm(initial={'content_type': blog_content_type.model, 'object_id': blog_id}),
 
     }
-    return render(request, 'blog/blog.html', context)
+    response = render(request, 'blog/blog.html', context)
+    response.set_cookie(read_cookie_key, 'true')
+    return response
 
 
 def new_blog(request):
@@ -59,12 +85,34 @@ def new_blog(request):
         # POST提交的数据，对数据进行处理
         form = BlogForm(request.POST)
         if form.is_valid():
-            new_topic = form.save(commit=False)
-            new_topic.author = request.user
-            new_topic.save()
+            new_blog = form.save(commit=False)
+            new_blog.author = request.user
+            new_blog.save()
             return HttpResponseRedirect(reverse('blog:blogs'))
     context = {'form': form}
     return render(request, 'blog/new_blog.html', context)
+
+
+def blog_with_data(request, year, month):
+    blog_list = Blog.objects.filter(pub_date__year=year, pub_date__month=month)
+    # date = datetime.date(year=year, month=month, day=1)
+    # context = {
+    #     'date': date
+    # }
+    context = {}
+    context.update(common(request, blog_list=blog_list))
+    return render(request, 'blog/blog_with_data.html', context)
+
+
+def blog_with_tag(request, tag_id):
+    tag = get_object_or_404(Tag, pk=tag_id)
+    blog_list = Blog.objects.filter(tag=tag)
+
+    context = {
+        'tag': tag,
+    }
+    context.update(common(request, blog_list=blog_list))
+    return render(request, 'blog/blog_with_tag.html', context)
 
 
 def topics(request):
@@ -160,3 +208,9 @@ def edit_blog(request, blog_id):
         'form': form,
     }
     return render(request, 'blog/edit_blog.html', context)
+
+
+def delete_blog(request, blog_id):
+    blog = Blog.objects.get(id=blog_id)
+    Blog.delete(blog)
+    return HttpResponseRedirect(reverse('blog:blogs'))
